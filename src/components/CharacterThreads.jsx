@@ -1,6 +1,8 @@
+import { memo } from 'react'
+
 const PREVIEW_COUNT = 5
 
-export default function CharacterThreads({ threads, chapters, onExpand }) {
+export default memo(function CharacterThreads({ threads, chapters, onExpand }) {
   const { reappearing, absent } = threads
 
   if (absent.length === 0 && reappearing.length === 0) return null
@@ -63,4 +65,4 @@ export default function CharacterThreads({ threads, chapters, onExpand }) {
       </div>
     </div>
   )
-}
+})

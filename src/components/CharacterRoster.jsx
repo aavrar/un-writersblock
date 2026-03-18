@@ -1,4 +1,6 @@
-export default function CharacterRoster({ characters }) {
+import { memo } from 'react'
+
+export default memo(function CharacterRoster({ characters }) {
   return (
     <div>
       {characters.length === 0 ? (
@@ -17,4 +19,4 @@ export default function CharacterRoster({ characters }) {
       )}
     </div>
   )
-}
+})

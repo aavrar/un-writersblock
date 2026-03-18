@@ -1,46 +1,62 @@
 import CharacterMap from './CharacterMap'
+import ParagraphWithAnnotation from './ParagraphWithAnnotation'
+import TimelineView from './TimelineView'
 
-export default function RightPanel({ view, onClose }) {
+export default function RightPanel({ view, onClose, onManageCharacters, chapterIndex, annotations, onUpdateAnnotations }) {
   if (!view) {
     return (
-      <div className="flex-1 border-l border-stone-200 bg-white flex items-center justify-center">
-        <p className="text-xs text-stone-300 select-none">Select a section to expand</p>
+      <div className="flex-1 border-l border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 flex items-center justify-center transition-colors">
+        <p className="text-xs text-stone-300 dark:text-stone-600 select-none">Select a section to expand</p>
       </div>
     )
   }
 
   return (
-    <div className="flex-1 border-l border-stone-200 bg-white flex flex-col overflow-hidden">
-      <div className="px-8 py-4 border-b border-stone-200 flex items-center justify-between shrink-0">
-        <p className="text-xs text-stone-400 uppercase tracking-wider font-medium">{view.title}</p>
-        <button onClick={onClose} className="text-xs text-stone-400 hover:text-stone-600 transition-colors">
+    <div className="flex-1 border-l border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 flex flex-col overflow-hidden transition-colors">
+      <div className="px-8 py-4 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between shrink-0 transition-colors">
+        <p className="text-xs text-stone-400 dark:text-stone-500 uppercase tracking-wider font-medium">{view.title}</p>
+        <button onClick={onClose} className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors">
           Close
         </button>
       </div>
       <div className="flex-1 overflow-y-auto px-8 py-6">
-        {view.type === 'scene' && <SceneView scenes={view.data} />}
+        {view.type === 'scene' && (
+          <SceneView
+            scenes={view.data}
+            chapterIndex={chapterIndex}
+            annotations={annotations}
+            onUpdateAnnotations={onUpdateAnnotations}
+          />
+        )}
         {view.type === 'threads' && <ThreadsView threads={view.data} chapters={view.chapters} />}
         {view.type === 'outline' && <OutlineView results={view.data} sectionHeader={view.sectionHeader} />}
-        {view.type === 'characterMap' && <CharacterMap chapters={view.chapters} />}
+        {view.type === 'characterMap' && <CharacterMap chapters={view.chapters} onManageCharacters={onManageCharacters} />}
+        {view.type === 'timeline' && <TimelineView chapters={view.chapters} outlineSections={view.outlineSections} />}
       </div>
     </div>
   )
 }
 
-function SceneView({ scenes }) {
+function SceneView({ scenes, chapterIndex, annotations, onUpdateAnnotations }) {
   return (
     <div className="space-y-10">
       {scenes.map((scene, si) => (
         <div key={si}>
           {scenes.length > 1 && (
-            <p className="text-xs text-stone-400 mb-4">Scene {si + 1}</p>
+            <p className="text-xs text-stone-400 dark:text-stone-500 mb-4">Scene {si + 1}</p>
           )}
           <div className="space-y-4">
-            {scene.paragraphs.map((paragraph, pi) => (
-              <p key={pi} className="font-serif text-stone-700 leading-relaxed text-base">
-                {paragraph}
-              </p>
-            ))}
+            {scene.paragraphs.map((paragraph, pi) => {
+              const absIndex = scene.startParagraphIndex + pi
+              return (
+                <ParagraphWithAnnotation
+                  key={absIndex}
+                  text={paragraph}
+                  note={annotations?.[absIndex]}
+                  onSaveNote={(note) => onUpdateAnnotations(chapterIndex, absIndex, note)}
+                />
+              )
+            })}
           </div>
         </div>
       ))}
@@ -93,14 +109,14 @@ function OutlineView({ results, sectionHeader }) {
   return (
     <div>
       {sectionHeader && (
-        <p className="text-xs text-stone-400 italic mb-4">{sectionHeader}</p>
+        <p className="text-xs text-stone-400 dark:text-stone-500 italic mb-4 transition-colors">{sectionHeader}</p>
       )}
-      <p className="text-xs text-stone-400 mb-5">{covered}/{results.length} beats found in chapter text</p>
+      <p className="text-xs text-stone-400 dark:text-stone-500 mb-5 transition-colors">{covered}/{results.length} beats found in chapter text</p>
       <div className="space-y-3">
         {results.map(({ beat, covered }, i) => (
           <div key={i} className="flex items-start gap-3">
-            <div className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${covered ? 'bg-stone-500' : 'bg-stone-200'}`} />
-            <p className={`text-sm leading-snug ${covered ? 'text-stone-700' : 'text-stone-400'}`}>{beat}</p>
+            <div className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 transition-colors ${covered ? 'bg-stone-500 dark:bg-stone-400' : 'bg-stone-200 dark:bg-stone-700'}`} />
+            <p className={`text-sm leading-snug transition-colors ${covered ? 'text-stone-700 dark:text-stone-300' : 'text-stone-400 dark:text-stone-600'}`}>{beat}</p>
           </div>
         ))}
       </div>

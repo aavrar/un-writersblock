@@ -32,7 +32,7 @@ function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
-export function detectCharacters(paragraphs) {
+export function detectCharacters(paragraphs, rules = {}) {
   const rawText = paragraphs.join(' ')
   const normalizedText = normalizeText(rawText)
   const doc = nlp(normalizedText)
@@ -55,17 +55,22 @@ export function detectCharacters(paragraphs) {
 
   const deduped = [...new Set(cleaned)]
 
-  const merged = deduped.filter(name =>
-    !deduped.some(other => other !== name && other.toLowerCase().includes(name.toLowerCase()))
-  )
+  const counts = {}
 
-  return merged
-    .map(name => ({
-      name,
-      count: (rawText.match(new RegExp(`\\b${escapeRegExp(name)}\\b`, 'gi')) || []).length,
-    }))
-    .filter(entry => entry.count > 0)
-    .sort((a, b) => b.count - a.count)
+  deduped.forEach(name => {
+    const c = (rawText.match(new RegExp(`\\b${escapeRegExp(name)}\\b`, 'gi')) || []).length
+    if (c > 0) {
+      let finalName = name
+      const rule = rules[name]
+      if (rule?.action === 'delete') return
+      if (rule?.action === 'merge' && rule.target) finalName = rule.target
+
+      counts[finalName] = (counts[finalName] || 0) + c
+    }
+  })
+
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
     .slice(0, 20)
-    .map(entry => entry.name)
+    .map(entry => entry[0])
 }

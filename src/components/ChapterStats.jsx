@@ -1,4 +1,6 @@
-export default function ChapterStats({ stats }) {
+import { memo } from 'react'
+
+export default memo(function ChapterStats({ stats }) {
   const items = [
     { label: 'words', value: stats.wordCount.toLocaleString() },
     { label: 'scenes', value: stats.sceneCount },
@@ -17,4 +19,4 @@ export default function ChapterStats({ stats }) {
       </div>
     </div>
   )
-}
+})

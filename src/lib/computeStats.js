@@ -1,3 +1,7 @@
+import Sentiment from 'sentiment'
+
+const sentimentAnalyser = new Sentiment()
+
 export function computeStats(paragraphs, scenes) {
   const fullText = paragraphs.join(' ')
 
@@ -5,12 +9,19 @@ export function computeStats(paragraphs, scenes) {
   const paragraphCount = paragraphs.length
   const sceneCount = scenes.length
 
-  const sentenceLengths = fullText
-    .split(/[.!?]+/)
+  const sentences = fullText
+    .split(/(?<=[.!?]+)\s+/)
     .map(s => s.trim())
     .filter(s => s.length > 0)
+
+  const sentenceLengths = sentences
     .map(s => s.split(/\s+/).filter(Boolean).length)
     .filter(len => len > 0)
 
-  return { wordCount, paragraphCount, sceneCount, sentenceLengths }
+  const sentenceSentiment = sentences.map(s => {
+    const res = sentimentAnalyser.analyze(s)
+    return res.comparative
+  })
+
+  return { wordCount, paragraphCount, sceneCount, sentenceLengths, sentenceSentiment }
 }

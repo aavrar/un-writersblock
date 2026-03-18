@@ -1,3 +1,5 @@
+import { memo } from 'react'
+
 const MAX_HEIGHT = 60
 const BAR_WIDTH = 2
 const BAR_GAP = 1
@@ -8,11 +10,19 @@ function sentenceColor(length) {
   return '#44403c'
 }
 
-export default function RhythmChart({ sentenceLengths }) {
+export default memo(function RhythmChart({ sentenceLengths, sentenceSentiment }) {
   if (!sentenceLengths || sentenceLengths.length === 0) return null
 
   const maxLen = Math.max(...sentenceLengths)
   const totalWidth = sentenceLengths.length * (BAR_WIDTH + BAR_GAP)
+
+  const clamp = (val, min, max) => Math.min(Math.max(val, min), max)
+  const sentimentPoints = sentenceSentiment?.map((score, i) => {
+    const x = i * (BAR_WIDTH + BAR_GAP) + (BAR_WIDTH / 2)
+    const capped = clamp(score, -2, 2)
+    const y = (MAX_HEIGHT / 2) - (capped / 2) * (MAX_HEIGHT / 2)
+    return `${x},${y}`
+  }).join(' ')
 
   return (
     <div>
@@ -36,6 +46,15 @@ export default function RhythmChart({ sentenceLengths }) {
               />
             )
           })}
+          {sentenceSentiment && sentenceSentiment.length > 0 && (
+            <polyline
+              points={sentimentPoints}
+              fill="none"
+              stroke="#eab308"
+              strokeWidth="2"
+              className="opacity-80 drop-shadow-md"
+            />
+          )}
         </svg>
       </div>
       <div className="flex gap-4 mt-3">
@@ -49,7 +68,11 @@ export default function RhythmChart({ sentenceLengths }) {
             <span className="text-xs text-stone-400">{label}</span>
           </div>
         ))}
+        <div className="flex items-center gap-1.5 ml-4">
+          <div className="w-4 h-0.5 bg-yellow-500 rounded-sm shrink-0" />
+          <span className="text-xs text-stone-500 dark:text-stone-400 font-medium">Emotional trend</span>
+        </div>
       </div>
     </div>
   )
-}
+})

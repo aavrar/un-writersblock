@@ -12,7 +12,7 @@ export function buildCharacterMap(chapters) {
   }))
 }
 
-export default function CharacterMap({ chapters }) {
+export default function CharacterMap({ chapters, onManageCharacters }) {
   const rows = buildCharacterMap(chapters)
 
   if (rows.length === 0) {
@@ -23,6 +23,14 @@ export default function CharacterMap({ chapters }) {
 
   return (
     <div className="overflow-x-auto">
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={onManageCharacters}
+          className="text-xs text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 underline transition-colors"
+        >
+          Manage characters
+        </button>
+      </div>
       <table className="text-xs border-collapse" style={{ minWidth: chapters.length * 36 + 140 }}>
         <thead>
           <tr>
@@ -44,9 +52,8 @@ export default function CharacterMap({ chapters }) {
               </td>
               {presence.map((present, i) => (
                 <td key={i} className="w-8 text-center py-1">
-                  <div className={`w-2 h-2 rounded-full mx-auto transition-colors ${
-                    present ? 'bg-stone-500 group-hover:bg-stone-700' : 'bg-stone-100'
-                  }`} />
+                  <div className={`w-2 h-2 rounded-full mx-auto transition-colors ${present ? 'bg-stone-500 group-hover:bg-stone-700' : 'bg-stone-100'
+                    }`} />
                 </td>
               ))}
             </tr>

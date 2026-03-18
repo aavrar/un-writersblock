@@ -16,21 +16,20 @@ export default function UploadZone({ onFile }) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-stone-50">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-stone-50 dark:bg-stone-950 transition-colors">
       <div
         onClick={() => inputRef.current.click()}
         onDragOver={e => { e.preventDefault(); setDragging(true) }}
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
-        className={`cursor-pointer border-2 border-dashed rounded-lg px-20 py-16 flex flex-col items-center gap-4 transition-colors ${
-          dragging ? 'border-stone-500 bg-stone-100' : 'border-stone-300 bg-white'
-        }`}
+        className={`cursor-pointer border-2 border-dashed rounded-lg px-20 py-16 flex flex-col items-center gap-4 transition-colors ${dragging ? 'border-stone-500 bg-stone-100 dark:bg-stone-800' : 'border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900'
+          }`}
       >
-        <div className="text-stone-400 text-5xl select-none">+</div>
-        <p className="text-stone-700 text-lg font-medium">Drop your manuscript here</p>
-        <p className="text-stone-400 text-sm">or click to select a .docx file</p>
+        <div className="text-stone-400 dark:text-stone-500 text-5xl select-none">+</div>
+        <p className="text-stone-700 dark:text-stone-200 text-lg font-medium">Drop your manuscript here</p>
+        <p className="text-stone-400 dark:text-stone-500 text-sm">or click to select a .docx file</p>
       </div>
-      <p className="mt-6 text-stone-400 text-xs">Your manuscript never leaves this browser.</p>
+      <p className="mt-6 text-stone-400 dark:text-stone-500 text-xs">Your manuscript never leaves this browser.</p>
       <input
         ref={inputRef}
         type="file"

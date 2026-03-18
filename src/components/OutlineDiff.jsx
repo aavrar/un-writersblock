@@ -5,6 +5,7 @@ export default function OutlineDiff({ chapterTitle, chapterParagraphs, sections,
   const [loading, setLoading] = useState(false)
   const [pasteMode, setPasteMode] = useState(false)
   const [pasteText, setPasteText] = useState('')
+  const [dragging, setDragging] = useState(false)
   const inputRef = useRef(null)
 
   async function handleFile(file) {
@@ -41,40 +42,51 @@ export default function OutlineDiff({ chapterTitle, chapterParagraphs, sections,
               value={pasteText}
               onChange={e => setPasteText(e.target.value)}
               placeholder="Paste your outline notes here, one beat per line..."
-              className="w-full h-36 text-sm text-stone-700 border border-stone-200 rounded p-3 resize-none focus:outline-none focus:border-stone-400"
+              className="w-full h-36 text-sm text-stone-700 dark:text-stone-300 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded p-3 resize-none focus:outline-none focus:border-stone-400 dark:focus:border-stone-600 transition-colors"
             />
             <div className="flex gap-2">
               <button
                 onClick={handlePasteConfirm}
                 disabled={!pasteText.trim()}
-                className="px-3 py-1.5 text-xs text-white bg-stone-800 rounded hover:bg-stone-700 disabled:opacity-40 transition-colors"
+                className="px-3 py-1.5 text-xs text-white bg-stone-800 dark:bg-stone-700 rounded hover:bg-stone-700 dark:hover:bg-stone-600 disabled:opacity-40 transition-colors"
               >
                 Parse outline
               </button>
               <button
                 onClick={() => setPasteMode(false)}
-                className="px-3 py-1.5 text-xs text-stone-500 hover:text-stone-700 transition-colors"
+                className="px-3 py-1.5 text-xs text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 transition-colors"
               >
                 Cancel
               </button>
             </div>
           </div>
         ) : (
-          <div className="flex gap-3 items-center">
-            <button
-              onClick={() => inputRef.current.click()}
-              disabled={loading}
-              className="px-3 py-1.5 text-xs text-stone-600 border border-stone-300 rounded hover:bg-stone-50 transition-colors"
-            >
-              {loading ? 'Loading...' : 'Upload outline (.docx or .txt)'}
-            </button>
-            <span className="text-stone-300 text-xs">or</span>
-            <button
-              onClick={() => setPasteMode(true)}
-              className="text-xs text-stone-400 hover:text-stone-600 transition-colors"
-            >
-              Paste notes
-            </button>
+          <div
+            onClick={() => inputRef.current.click()}
+            onDragOver={e => { e.preventDefault(); setDragging(true) }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={e => {
+              e.preventDefault()
+              setDragging(false)
+              if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                handleFile(e.dataTransfer.files[0])
+              }
+            }}
+            className={`cursor-pointer border-2 border-dashed rounded py-6 flex flex-col items-center justify-center gap-2 transition-colors ${dragging ? 'border-stone-500 bg-stone-100 dark:bg-stone-800' : 'border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-800/50'
+              }`}
+          >
+            <span className="text-stone-500 dark:text-stone-400 text-sm font-medium">
+              {loading ? 'Processing outline...' : 'Drop outline here (.txt, .docx)'}
+            </span>
+            <div className="flex gap-2 items-center">
+              <span className="text-stone-400 dark:text-stone-500 text-xs">or</span>
+              <button
+                onClick={(e) => { e.stopPropagation(); setPasteMode(true) }}
+                className="text-xs text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 transition-colors underline"
+              >
+                paste notes
+              </button>
+            </div>
             <input
               ref={inputRef}
               type="file"
@@ -94,11 +106,11 @@ export default function OutlineDiff({ chapterTitle, chapterParagraphs, sections,
     return (
       <div>
         <div className="flex items-center justify-between mb-3">
-          <button onClick={() => onSectionsLoaded(null)} className="text-xs text-stone-400 hover:text-stone-600 transition-colors">
+          <button onClick={() => onSectionsLoaded(null)} className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors">
             Change outline
           </button>
         </div>
-        <p className="text-stone-400 text-sm">
+        <p className="text-stone-400 dark:text-stone-500 text-sm transition-colors">
           No matching outline section found for this chapter.
         </p>
       </div>
@@ -113,14 +125,14 @@ export default function OutlineDiff({ chapterTitle, chapterParagraphs, sections,
       <div className="flex items-center justify-between mb-3">
         <span />
         <div className="flex items-center gap-3">
-          <span className="text-xs text-stone-400">{coveredCount}/{results.length} beats found</span>
+          <span className="text-xs text-stone-400 dark:text-stone-500 transition-colors">{coveredCount}/{results.length} beats found</span>
           <button
             onClick={() => onExpand({ type: 'outline', title: 'Outline coverage', data: results, sectionHeader: section.header })}
-            className="text-xs text-stone-400 hover:text-stone-600 transition-colors"
+            className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
           >
             Expand
           </button>
-          <button onClick={() => onSectionsLoaded(null)} className="text-xs text-stone-400 hover:text-stone-600 transition-colors">
+          <button onClick={() => onSectionsLoaded(null)} className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors">
             Change
           </button>
         </div>
