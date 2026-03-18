@@ -1,6 +1,4 @@
-import Sentiment from 'sentiment'
-
-const sentimentAnalyser = new Sentiment()
+import { analyzeSentiment } from './AfinnSentiment'
 
 export function computeStats(paragraphs, scenes) {
   const fullText = paragraphs.join(' ')
@@ -19,8 +17,7 @@ export function computeStats(paragraphs, scenes) {
     .filter(len => len > 0)
 
   const sentenceSentiment = sentences.map(s => {
-    const res = sentimentAnalyser.analyze(s)
-    return res.comparative
+    return analyzeSentiment(s).comparative
   })
 
   return { wordCount, paragraphCount, sceneCount, sentenceLengths, sentenceSentiment, sentences }
