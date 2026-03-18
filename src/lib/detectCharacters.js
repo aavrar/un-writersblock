@@ -47,6 +47,7 @@ export function detectCharacters(paragraphs, rules = {}) {
       if (name.length < 2) return false
       if (/^[a-z]/.test(name)) return false
       if (/[—\-"']/.test(name)) return false
+      if (/[.!?;:]/.test(name)) return false // Strip cross-sentence punctuation bleeds like "Amina. It"
       if (name.split(/\s+/).length > 2) return false
       const lower = name.toLowerCase()
       if (NOISE_WORDS.has(lower)) return false
@@ -56,7 +57,24 @@ export function detectCharacters(paragraphs, rules = {}) {
       return true
     })
 
+  // 2. Custom Regex: Consecutive capitalized words NOT at the start of a sentence
+  // Lookbehind for a lowercase letter, comma, quote, or colon followed by space
+  const regexMatches = rawText.match(/(?<=[a-z,:"”’]\s+)[A-Z][a-z]+\s+[A-Z][a-z]+/g) || []
+  for (const match of regexMatches) {
+    const lower = match.toLowerCase()
+    if (!places.has(lower) && !orgs.has(lower) && !NOISE_WORDS.has(lower) && !NOISE_WORDS.has(lower.split(' ')[0])) {
+      cleaned.push(match)
+    }
+  }
+
   const dedupedNames = new Set(cleaned)
+
+  // 3. First-Person Narrator Detection ("I" outside of dialogue)
+  const nonDialogueText = rawText.replace(/["“”].*?["“”]/g, ' ')
+  const narratorCount = (nonDialogueText.match(/\bI\b/g) || []).length
+  if (narratorCount > 2) {
+    dedupedNames.add('Narrator ("I")')
+  }
 
   for (const [name, rule] of Object.entries(rules)) {
     if (rule.action === 'add') dedupedNames.add(name)
@@ -65,8 +83,12 @@ export function detectCharacters(paragraphs, rules = {}) {
   const deduped = [...dedupedNames]
 
   const counts = {}
+  if (dedupedNames.has('Narrator ("I")')) {
+    counts['Narrator ("I")'] = narratorCount
+  }
 
   deduped.forEach(name => {
+    if (name === 'Narrator ("I")') return // already counted accurately above
     const c = (rawText.match(new RegExp(`\\b${escapeRegExp(name)}\\b`, 'gi')) || []).length
     if (c > 0) {
       let finalName = name

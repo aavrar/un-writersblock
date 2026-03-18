@@ -18,7 +18,22 @@ async function analyzeChapters(chapters, rules = {}) {
     const worker = new Worker(new URL('./lib/parserWorker.js', import.meta.url), { type: 'module' })
     worker.onmessage = (e) => {
       if (e.data.type === 'done') {
-        resolve(e.data.payload)
+        const rawProcessed = e.data.payload
+        const globalCounts = {}
+        for (const ch of rawProcessed) {
+          for (const char of ch.characters) {
+            globalCounts[char.name] = (globalCounts[char.name] || 0) + char.count
+          }
+        }
+        const processed = rawProcessed.map(ch => ({
+          ...ch,
+          characters: ch.characters.filter(char => {
+            if (rules[char.name] && rules[char.name].action === 'add') return true
+            if (char.name === 'Narrator ("I")') return true
+            return globalCounts[char.name] > 2
+          })
+        }))
+        resolve(processed)
         worker.terminate()
       }
     }
