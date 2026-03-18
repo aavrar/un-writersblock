@@ -1,4 +1,7 @@
-const EXPLICIT_BREAK = /^\s*([\*\-#~]{3,}|#)\s*$/
+function isBreak(paragraph) {
+  const normalized = paragraph.replace(/[^\S\n]/g, ' ').replace(/\u00a0/g, ' ').trim()
+  return /^([\*\#\-~]{3,}|[#＃\*])$/.test(normalized)
+}
 
 const SCENE_NUMBER = /^(scene\s*)?\d{1,3}\.?\s*$/i
 const ROMAN_NUMERAL = /^(scene\s*)?(i{1,3}|iv|v?i{0,3}|ix|x{1,3})\s*\.?\s*$/i
@@ -51,7 +54,7 @@ export function detectScenes(paragraphs) {
 
   for (let i = 0; i < paragraphs.length; i++) {
     const p = paragraphs[i]
-    if (EXPLICIT_BREAK.test(p)) {
+    if (isBreak(p)) {
       boundaryIndices.push(i + 1)
     } else if (looksLikeSceneSlug(p)) {
       boundaryIndices.push(i)
@@ -67,7 +70,7 @@ export function detectScenes(paragraphs) {
     return {
       startParagraphIndex: start,
       endParagraphIndex: end - 1,
-      paragraphs: paragraphs.slice(start, end).filter(p => !EXPLICIT_BREAK.test(p) && !looksLikeSceneSlug(p)),
+      paragraphs: paragraphs.slice(start, end).filter(p => !isBreak(p) && !looksLikeSceneSlug(p)),
     }
   }).filter(scene => scene.paragraphs.length > 0)
 }
