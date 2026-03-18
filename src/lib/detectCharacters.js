@@ -38,6 +38,8 @@ export function detectCharacters(paragraphs, rules = {}) {
   const doc = nlp(normalizedText)
 
   const raw = doc.people().out('array')
+  const places = new Set(doc.places().out('array').map(cleanName).map(s => s.toLowerCase()))
+  const orgs = new Set(doc.organizations().out('array').map(cleanName).map(s => s.toLowerCase()))
 
   const cleaned = raw
     .map(cleanName)
@@ -49,11 +51,18 @@ export function detectCharacters(paragraphs, rules = {}) {
       const lower = name.toLowerCase()
       if (NOISE_WORDS.has(lower)) return false
       if (NOISE_WORDS.has(lower.split(' ')[0])) return false
+      if (places.has(lower) || orgs.has(lower)) return false
       if (/^\d/.test(name)) return false
       return true
     })
 
-  const deduped = [...new Set(cleaned)]
+  const dedupedNames = new Set(cleaned)
+
+  for (const [name, rule] of Object.entries(rules)) {
+    if (rule.action === 'add') dedupedNames.add(name)
+  }
+
+  const deduped = [...dedupedNames]
 
   const counts = {}
 

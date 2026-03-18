@@ -1,6 +1,7 @@
 import CharacterMap from './CharacterMap'
 import ParagraphWithAnnotation from './ParagraphWithAnnotation'
 import TimelineView from './TimelineView'
+import RhythmChart from './RhythmChart'
 
 export default function RightPanel({ view, onClose, onManageCharacters, chapterIndex, annotations, onUpdateAnnotations }) {
   if (!view) {
@@ -32,6 +33,17 @@ export default function RightPanel({ view, onClose, onManageCharacters, chapterI
         {view.type === 'outline' && <OutlineView results={view.data} sectionHeader={view.sectionHeader} />}
         {view.type === 'characterMap' && <CharacterMap chapters={view.chapters} onManageCharacters={onManageCharacters} />}
         {view.type === 'timeline' && <TimelineView chapters={view.chapters} outlineSections={view.outlineSections} />}
+        {view.type === 'rhythm' && (
+          <div className="w-full">
+            <p className="text-sm text-stone-500 dark:text-stone-400 mb-8 italic">A horizontal view of the emotional and structural flow of the chapter.</p>
+            <RhythmChart
+              sentenceLengths={view.data.sentenceLengths}
+              sentenceSentiment={view.data.sentenceSentiment}
+              sentences={view.data.sentences}
+              isExpanded={true}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

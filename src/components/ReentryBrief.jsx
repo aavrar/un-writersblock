@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import SectionBlock from './SectionBlock'
 import LastScene from './LastScene'
 import CharacterRoster from './CharacterRoster'
@@ -20,6 +20,29 @@ export default function ReentryBrief({
   function handleExpand(view) {
     setExpandedView(prev => prev?.type === view.type ? null : view)
   }
+
+  useEffect(() => {
+    setExpandedView(prev => {
+      if (!prev) return null
+
+      switch (prev.type) {
+        case 'scene':
+          return { ...prev, data: chapter.scenes, chapterIndex }
+        case 'rhythm':
+          return { ...prev, data: { sentenceLengths: chapter.stats.sentenceLengths, sentenceSentiment: chapter.stats.sentenceSentiment, sentences: chapter.stats.sentences } }
+        case 'characterMap':
+          return { ...prev, chapters }
+        case 'timeline':
+          return { ...prev, chapters, outlineSections }
+        case 'threads':
+          return { ...prev, data: threads, chapters }
+        case 'outline':
+          return null // Requires local diff computation, gracefully close
+        default:
+          return prev
+      }
+    })
+  }, [chapterIndex, chapter, chapters, threads, outlineSections])
 
   return (
     <div className="flex flex-1 overflow-hidden">
@@ -88,6 +111,8 @@ export default function ReentryBrief({
             <RhythmChart
               sentenceLengths={stats.sentenceLengths}
               sentenceSentiment={stats.sentenceSentiment}
+              sentences={stats.sentences}
+              onExpand={handleExpand}
             />
           </SectionBlock>
         </div>

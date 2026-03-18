@@ -23,5 +23,5 @@ export function computeStats(paragraphs, scenes) {
     return res.comparative
   })
 
-  return { wordCount, paragraphCount, sceneCount, sentenceLengths, sentenceSentiment }
+  return { wordCount, paragraphCount, sceneCount, sentenceLengths, sentenceSentiment, sentences }
 }

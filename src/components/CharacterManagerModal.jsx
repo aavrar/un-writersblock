@@ -6,11 +6,19 @@ export default function CharacterManagerModal({ chapters, rules, onSaveRules, on
 
     const [mergeSource, setMergeSource] = useState('')
     const [mergeTarget, setMergeTarget] = useState('')
+    const [newCharacter, setNewCharacter] = useState('')
 
     function handleAddMerge() {
         if (!mergeSource || !mergeTarget || mergeSource === mergeTarget) return
         setLocalRules(prev => ({ ...prev, [mergeSource]: { action: 'merge', target: mergeTarget } }))
         setMergeSource('')
+    }
+
+    function handleAddCharacter() {
+        const clean = newCharacter.trim()
+        if (!clean) return
+        setLocalRules(prev => ({ ...prev, [clean]: { action: 'add' } }))
+        setNewCharacter('')
     }
 
     function handleSave() {
@@ -65,6 +73,27 @@ export default function CharacterManagerModal({ chapters, rules, onSaveRules, on
                 </section>
 
                 <section>
+                    <h2 className="text-stone-800 dark:text-stone-200 font-medium mb-4">Add Missing Character</h2>
+                    <div className="flex gap-3 items-center p-4 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded shadow-sm">
+                        <input
+                            type="text"
+                            placeholder="Enter a sci-fi, fantasy, or missed character name..."
+                            value={newCharacter}
+                            onChange={(e) => setNewCharacter(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && handleAddCharacter()}
+                            className="flex-1 bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded p-2 text-sm text-stone-800 dark:text-stone-200 placeholder-stone-400 focus:outline-none focus:border-stone-400 dark:focus:border-stone-600 transition-colors"
+                        />
+                        <button
+                            onClick={handleAddCharacter}
+                            disabled={!newCharacter.trim()}
+                            className="px-4 py-2 text-sm bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded hover:bg-stone-200 dark:hover:bg-stone-700 disabled:opacity-50 transition-colors"
+                        >
+                            Force Add
+                        </button>
+                    </div>
+                </section>
+
+                <section>
                     <h2 className="text-stone-800 dark:text-stone-200 font-medium mb-4">Merge Aliases</h2>
                     <div className="flex gap-3 items-center p-4 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded shadow-sm">
                         <select
@@ -102,12 +131,14 @@ export default function CharacterManagerModal({ chapters, rules, onSaveRules, on
                         <ul className="space-y-2">
                             {Object.entries(localRules).map(([name, rule]) => (
                                 <li key={name} className="flex items-center justify-between p-3 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded shadow-sm">
-                                    <span className="text-sm text-stone-700 dark:text-stone-300">
-                                        {rule.action === 'delete' ? (
-                                            <span className="line-through opacity-60">{name}</span>
-                                        ) : (
-                                            <span>{name} &rarr; <strong>{rule.target}</strong></span>
-                                        )}
+                                    <span className="text-sm text-stone-700 dark:text-stone-300 flex items-center gap-2">
+                                        {rule.action === 'delete' && <span className="line-through text-stone-400 text-xs line-through mt-0.5">{name}</span>}
+                                        {rule.action === 'delete' && <span className="text-red-500 font-medium text-xs">(Deleted)</span>}
+
+                                        {rule.action === 'merge' && <span>{name} <span className="text-stone-400 mx-1">&rarr;</span> <strong>{rule.target}</strong></span>}
+
+                                        {rule.action === 'add' && <span><strong>{name}</strong></span>}
+                                        {rule.action === 'add' && <span className="text-emerald-500 font-medium text-xs">(Forced)</span>}
                                     </span>
                                     <button
                                         onClick={() => {
