@@ -1,9 +1,29 @@
+import { useState, useEffect } from 'react'
 import CharacterMap from './CharacterMap'
 import ParagraphWithAnnotation from './ParagraphWithAnnotation'
 import TimelineView from './TimelineView'
 import RhythmChart from './RhythmChart'
+import ChapterOverview from './ChapterOverview'
 
-export default function RightPanel({ view, onClose, onManageCharacters, chapterIndex, annotations, onUpdateAnnotations }) {
+const TABS = [
+  { type: 'chapter', label: 'Chapter' },
+  { type: 'threads', label: 'Threads' },
+  { type: 'characterMap', label: 'Characters' },
+  { type: 'timeline', label: 'Timeline' },
+  { type: 'rhythm', label: 'Rhythm' },
+]
+
+export default function RightPanel({
+  view, onClose,
+  chapter, chapters, threads, outlineSections,
+  onManageCharacters, chapterIndex, annotations, onUpdateAnnotations
+}) {
+  const [activeTab, setActiveTab] = useState(view?.type || 'chapter')
+
+  useEffect(() => {
+    if (view?.type) setActiveTab(view.type)
+  }, [view?.type])
+
   if (!view) {
     return (
       <div className="flex-1 border-l border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 flex items-center justify-center transition-colors">
@@ -12,34 +32,64 @@ export default function RightPanel({ view, onClose, onManageCharacters, chapterI
     )
   }
 
+  const visibleTabs = activeTab === 'outline'
+    ? [...TABS, { type: 'outline', label: 'Outline' }]
+    : TABS
+
   return (
     <div className="flex-1 border-l border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 flex flex-col overflow-hidden transition-colors">
-      <div className="px-8 py-4 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between shrink-0 transition-colors">
-        <p className="text-xs text-stone-400 dark:text-stone-500 uppercase tracking-wider font-medium">{view.title}</p>
-        <button onClick={onClose} className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors">
+      <div className="px-4 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between shrink-0 transition-colors">
+        <div className="flex items-center">
+          {visibleTabs.map(tab => (
+            <button
+              key={tab.type}
+              onClick={() => setActiveTab(tab.type)}
+              className={`px-3 py-3.5 text-xs font-medium border-b-2 transition-colors ${
+                activeTab === tab.type
+                  ? 'border-stone-800 dark:border-stone-200 text-stone-800 dark:text-stone-200'
+                  : 'border-transparent text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={onClose}
+          className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors ml-4 shrink-0 py-3.5"
+        >
           Close
         </button>
       </div>
+
       <div className="flex-1 overflow-y-auto px-8 py-6">
-        {view.type === 'scene' && (
-          <SceneView
-            scenes={view.data}
+        {activeTab === 'chapter' && chapter && (
+          <ChapterView
+            chapter={chapter}
             chapterIndex={chapterIndex}
             annotations={annotations}
             onUpdateAnnotations={onUpdateAnnotations}
           />
         )}
-        {view.type === 'threads' && <ThreadsView threads={view.data} chapters={view.chapters} />}
-        {view.type === 'outline' && <OutlineView results={view.data} sectionHeader={view.sectionHeader} />}
-        {view.type === 'characterMap' && <CharacterMap chapters={view.chapters} onManageCharacters={onManageCharacters} />}
-        {view.type === 'timeline' && <TimelineView chapters={view.chapters} outlineSections={view.outlineSections} onManageCharacters={onManageCharacters} />}
-        {view.type === 'rhythm' && (
+        {activeTab === 'threads' && threads && (
+          <ThreadsView threads={threads} chapters={chapters} />
+        )}
+        {activeTab === 'outline' && view?.type === 'outline' && (
+          <OutlineView results={view.data} sectionHeader={view.sectionHeader} />
+        )}
+        {activeTab === 'characterMap' && (
+          <CharacterMap chapters={chapters} onManageCharacters={onManageCharacters} />
+        )}
+        {activeTab === 'timeline' && (
+          <TimelineView chapters={chapters} outlineSections={outlineSections} onManageCharacters={onManageCharacters} />
+        )}
+        {activeTab === 'rhythm' && chapter?.stats && (
           <div className="w-full">
-            <p className="text-sm text-stone-500 dark:text-stone-400 mb-8 italic">A horizontal view of the emotional and structural flow of the chapter.</p>
+            <p className="text-sm text-stone-500 dark:text-stone-400 mb-8 italic">Emotional and structural flow of the chapter.</p>
             <RhythmChart
-              sentenceLengths={view.data.sentenceLengths}
-              sentenceSentiment={view.data.sentenceSentiment}
-              sentences={view.data.sentences}
+              sentenceLengths={chapter.stats.sentenceLengths}
+              sentenceSentiment={chapter.stats.sentenceSentiment}
+              sentences={chapter.stats.sentences}
               isExpanded={true}
             />
           </div>
@@ -49,29 +99,41 @@ export default function RightPanel({ view, onClose, onManageCharacters, chapterI
   )
 }
 
-function SceneView({ scenes, chapterIndex, annotations, onUpdateAnnotations }) {
+function ChapterView({ chapter, chapterIndex, annotations, onUpdateAnnotations }) {
   return (
-    <div className="space-y-10">
-      {scenes.map((scene, si) => (
-        <div key={si}>
-          {scenes.length > 1 && (
-            <p className="text-xs text-stone-400 dark:text-stone-500 mb-4">Scene {si + 1}</p>
-          )}
-          <div className="space-y-4">
-            {scene.paragraphs.map((paragraph, pi) => {
-              const absIndex = scene.startParagraphIndex + pi
-              return (
-                <ParagraphWithAnnotation
-                  key={absIndex}
-                  text={paragraph}
-                  note={annotations?.[absIndex]}
-                  onSaveNote={(note) => onUpdateAnnotations(chapterIndex, absIndex, note)}
-                />
-              )
-            })}
-          </div>
-        </div>
-      ))}
+    <div>
+      <ChapterOverview stats={chapter.stats} characters={chapter.characters} />
+      <div className="h-px bg-stone-100 dark:bg-stone-800 my-8" />
+      <div className="space-y-10">
+        {chapter.scenes.map((scene, si) => {
+          const sceneWords = scene.paragraphs.join(' ').split(/\s+/).filter(Boolean).length
+          const dialogueParas = scene.paragraphs.filter(p => /^[\u201C"]/.test(p.trim())).length
+          const dialoguePct = Math.round((dialogueParas / Math.max(scene.paragraphs.length, 1)) * 100)
+
+          return (
+            <div key={si}>
+              {chapter.scenes.length > 1 && (
+                <p className="text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-4">
+                  Scene {si + 1} &middot; {sceneWords.toLocaleString()} words &middot; {dialoguePct}% dialogue
+                </p>
+              )}
+              <div className="space-y-4">
+                {scene.paragraphs.map((paragraph, pi) => {
+                  const absIndex = scene.startParagraphIndex + pi
+                  return (
+                    <ParagraphWithAnnotation
+                      key={absIndex}
+                      text={paragraph}
+                      note={annotations?.[absIndex]}
+                      onSaveNote={(note) => onUpdateAnnotations(chapterIndex, absIndex, note)}
+                    />
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -86,10 +148,10 @@ function ThreadsView({ threads, chapters }) {
           <div className="space-y-2">
             {reappearing.map(({ name, lastChapter, firstChapter }) => (
               <div key={name} className="flex items-start justify-between gap-4">
-                <span className="text-sm text-stone-800 font-medium">{name}</span>
+                <span className="text-sm text-stone-800 dark:text-stone-200 font-medium">{name}</span>
                 <span className="text-xs text-stone-400 text-right shrink-0">
                   first ch. {firstChapter + 1}, last ch. {lastChapter + 1}<br />
-                  <span className="text-stone-300">{chapters[lastChapter]?.title}</span>
+                  <span className="text-stone-300 dark:text-stone-600">{chapters[lastChapter]?.title}</span>
                 </span>
               </div>
             ))}
@@ -102,8 +164,8 @@ function ThreadsView({ threads, chapters }) {
           <div className="space-y-2">
             {absent.map(({ name, lastChapter, firstChapter }) => (
               <div key={name} className="flex items-start justify-between gap-4">
-                <span className="text-sm text-stone-600">{name}</span>
-                <span className="text-xs text-stone-300 text-right shrink-0">
+                <span className="text-sm text-stone-600 dark:text-stone-400">{name}</span>
+                <span className="text-xs text-stone-300 dark:text-stone-600 text-right shrink-0">
                   first ch. {firstChapter + 1}, last ch. {lastChapter + 1}<br />
                   <span>{chapters[lastChapter]?.title}</span>
                 </span>

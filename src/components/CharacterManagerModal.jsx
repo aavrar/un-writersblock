@@ -98,7 +98,7 @@ export default function CharacterManagerModal({ chapters, rules, onSaveRules, on
                     <div className="flex gap-3 items-center p-4 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded shadow-sm">
                         <select
                             value={mergeSource}
-                            onChange="{(e) => setMergeSource(e.target.value)}"
+                            onChange={(e) => setMergeSource(e.target.value)}
                             className="flex-1 bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded p-2 text-sm text-stone-800 dark:text-stone-200"
                         >
                             <option value="">Select character to merge...</option>
@@ -107,7 +107,7 @@ export default function CharacterManagerModal({ chapters, rules, onSaveRules, on
                         <span className="text-stone-400 text-sm">into</span>
                         <select
                             value={mergeTarget}
-                            onChange="{(e) => setMergeTarget(e.target.value)}"
+                            onChange={(e) => setMergeTarget(e.target.value)}
                             className="flex-1 bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded p-2 text-sm text-stone-800 dark:text-stone-200"
                         >
                             <option value="">Target character...</option>

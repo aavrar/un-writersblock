@@ -143,9 +143,22 @@ export default function App() {
     setStoredKey(null)
     setOutlineSections(null)
     setSelectedIndex(0)
+    setAnnotations({})
+    setCharacterRules({})
+    setProjectGoal(null)
     await del('manuscript_chapters')
     await del('all_paragraphs')
     await del('outline_sections')
+    await del('inline_annotations')
+    await del('character_rules')
+    await del('project_goal')
+  }
+
+  async function handleAddChapter({ title, paragraphs }) {
+    setPhase('parsing')
+    const [analyzed] = await analyzeChapters([{ title, paragraphs }], characterRules)
+    const newChapters = [...chapters, analyzed]
+    await applyChapters(newChapters)
   }
 
   async function updateOutlineSections(sections) {
@@ -254,6 +267,7 @@ export default function App() {
         selectedIndex={safeIndex}
         onSelect={setSelectedIndex}
         onReset={handleReset}
+        onAddChapter={handleAddChapter}
         projectGoal={projectGoal}
         onUpdateProjectGoal={handleUpdateProjectGoal}
       />

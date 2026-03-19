@@ -8,6 +8,7 @@ import ChapterStats from './ChapterStats'
 import RhythmChart from './RhythmChart'
 import RightPanel from './RightPanel'
 import SceneSplitterModal from './SceneSplitterModal'
+import ChapterOverview from './ChapterOverview'
 
 export default function ReentryBrief({
   chapter, chapters, threads, outlineSections, onOutlineLoaded,
@@ -15,7 +16,12 @@ export default function ReentryBrief({
 }) {
   const [expandedView, setExpandedView] = useState(null)
   const [isEditingScenes, setIsEditingScenes] = useState(false)
+  const [overviewMode, setOverviewMode] = useState(false)
   const { title, scenes, characters, stats, paragraphs } = chapter
+
+  useEffect(() => {
+    setOverviewMode(false)
+  }, [chapterIndex])
 
   function handleExpand(view) {
     setExpandedView(prev => prev?.type === view.type ? null : view)
@@ -24,10 +30,9 @@ export default function ReentryBrief({
   useEffect(() => {
     setExpandedView(prev => {
       if (!prev) return null
-
       switch (prev.type) {
-        case 'scene':
-          return { ...prev, data: chapter.scenes, chapterIndex }
+        case 'chapter':
+          return { type: 'chapter' }
         case 'rhythm':
           return { ...prev, data: { sentenceLengths: chapter.stats.sentenceLengths, sentenceSentiment: chapter.stats.sentenceSentiment, sentences: chapter.stats.sentences } }
         case 'characterMap':
@@ -37,7 +42,7 @@ export default function ReentryBrief({
         case 'threads':
           return { ...prev, data: threads, chapters }
         case 'outline':
-          return null // Requires local diff computation, gracefully close
+          return null
         default:
           return prev
       }
@@ -65,7 +70,7 @@ export default function ReentryBrief({
               Character map
             </button>
             <button
-              onClick={() => handleExpand({ type: 'timeline', title: 'Story timeline', data: null, chapters, outlineSections })}
+              onClick={() => handleExpand({ type: 'timeline', title: 'Story timeline', chapters, outlineSections })}
               className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
             >
               Story timeline
@@ -76,13 +81,25 @@ export default function ReentryBrief({
 
         <div className="space-y-8">
           <SectionBlock id="last-scene" title="Where you left off" defaultOpen={true}>
-            <LastScene
-              scenes={scenes}
-              onExpand={handleExpand}
-              chapterIndex={chapterIndex}
-              annotations={annotations}
-              onUpdateAnnotations={onUpdateAnnotations}
-            />
+            <div className="flex justify-end mb-3">
+              <button
+                onClick={() => setOverviewMode(m => !m)}
+                className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
+              >
+                {overviewMode ? 'show last scene' : 'chapter overview'}
+              </button>
+            </div>
+            {overviewMode ? (
+              <ChapterOverview stats={stats} characters={characters} />
+            ) : (
+              <LastScene
+                scenes={scenes}
+                onExpand={handleExpand}
+                chapterIndex={chapterIndex}
+                annotations={annotations}
+                onUpdateAnnotations={onUpdateAnnotations}
+              />
+            )}
           </SectionBlock>
 
           <SectionBlock id="characters" title="Characters" defaultOpen={true}>
@@ -121,6 +138,10 @@ export default function ReentryBrief({
       <RightPanel
         view={expandedView}
         onClose={() => setExpandedView(null)}
+        chapter={chapter}
+        chapters={chapters}
+        threads={threads}
+        outlineSections={outlineSections}
         onManageCharacters={onManageCharacters}
         chapterIndex={chapterIndex}
         annotations={annotations}

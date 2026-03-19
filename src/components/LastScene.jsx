@@ -15,10 +15,10 @@ export default memo(function LastScene({ scenes, onExpand, chapterIndex, annotat
       <div className="border-l-2 border-stone-300 pl-5">
         {hasMore && (
           <button
-            onClick={() => onExpand({ type: 'scene', title: 'Full scene', data: scenes, chapterIndex })}
+            onClick={() => onExpand({ type: 'chapter' })}
             className="text-xs text-stone-400 hover:text-stone-600 mb-3 block transition-colors"
           >
-            Show full scene ({paragraphs.length} paragraphs)
+            Show full chapter ({paragraphs.length} paragraphs)
           </button>
         )}
         {preview.map((paragraph, i) => {

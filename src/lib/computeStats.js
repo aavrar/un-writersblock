@@ -20,5 +20,11 @@ export function computeStats(paragraphs, scenes) {
     return analyzeSentiment(s).comparative
   })
 
-  return { wordCount, paragraphCount, sceneCount, sentenceLengths, sentenceSentiment, sentences }
+  const dialogueParagraphs = paragraphs.filter(p => /^[\u201C\u0022]/.test(p.trim())).length
+  const dialogueRatio = paragraphs.length > 0 ? Math.round((dialogueParagraphs / paragraphs.length) * 100) : 0
+
+  const allWords = fullText.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/).filter(Boolean)
+  const lexicalDensity = allWords.length > 0 ? Math.round((new Set(allWords).size / allWords.length) * 100) : 0
+
+  return { wordCount, paragraphCount, sceneCount, sentenceLengths, sentenceSentiment, sentences, dialogueRatio, lexicalDensity }
 }

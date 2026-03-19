@@ -1,9 +1,34 @@
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import GoalTracker from './GoalTracker'
 
-export default memo(function ChapterList({ chapters, selectedIndex, onSelect, onReset, projectGoal, onUpdateProjectGoal }) {
+function textToParagraphs(text) {
+  const byDouble = text.split(/\n\n+/).map(s => s.replace(/\n/g, ' ').trim()).filter(Boolean)
+  if (byDouble.length > 1) return byDouble
+  return text.split(/\n/).map(s => s.trim()).filter(Boolean)
+}
+
+export default memo(function ChapterList({ chapters, selectedIndex, onSelect, onReset, onAddChapter, projectGoal, onUpdateProjectGoal }) {
   const maxWords = Math.max(...chapters.map(c => c.stats.wordCount), 1)
   const totalWords = chapters.reduce((sum, c) => sum + c.stats.wordCount, 0)
+  const [isAdding, setIsAdding] = useState(false)
+  const [newTitle, setNewTitle] = useState('')
+  const [newText, setNewText] = useState('')
+
+  function handleSubmit() {
+    const paragraphs = textToParagraphs(newText)
+    if (paragraphs.length === 0) return
+    const title = newTitle.trim() || `Chapter ${chapters.length + 1}`
+    onAddChapter({ title, paragraphs })
+    setIsAdding(false)
+    setNewTitle('')
+    setNewText('')
+  }
+
+  function handleCancel() {
+    setIsAdding(false)
+    setNewTitle('')
+    setNewText('')
+  }
 
   return (
     <aside className="w-64 shrink-0 border-r border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 flex flex-col h-screen sticky top-0 overflow-hidden transition-colors">
@@ -19,8 +44,7 @@ export default memo(function ChapterList({ chapters, selectedIndex, onSelect, on
             <button
               key={i}
               onClick={() => onSelect(i)}
-              className={`relative w-full text-left px-4 py-2.5 text-sm transition-colors overflow-hidden ${isSelected ? 'text-stone-900 dark:text-stone-100 font-medium' : 'text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
-                }`}
+              className={`relative w-full text-left px-4 py-2.5 text-sm transition-colors overflow-hidden ${isSelected ? 'text-stone-900 dark:text-stone-100 font-medium' : 'text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'}`}
             >
               <div
                 className={`absolute inset-y-0 left-0 transition-colors ${isSelected ? 'bg-stone-100 dark:bg-stone-800' : 'bg-stone-50 dark:bg-stone-800/20'}`}
@@ -33,6 +57,47 @@ export default memo(function ChapterList({ chapters, selectedIndex, onSelect, on
             </button>
           )
         })}
+
+        {isAdding ? (
+          <div className="px-4 py-3 space-y-2 border-t border-stone-100 dark:border-stone-800/60 mt-1">
+            <input
+              type="text"
+              placeholder={`Chapter ${chapters.length + 1}`}
+              value={newTitle}
+              onChange={e => setNewTitle(e.target.value)}
+              className="w-full text-xs bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-700 rounded px-2 py-1.5 text-stone-800 dark:text-stone-200 placeholder-stone-400 focus:outline-none focus:border-stone-400 dark:focus:border-stone-500 transition-colors"
+            />
+            <textarea
+              placeholder="Paste chapter text here..."
+              value={newText}
+              onChange={e => setNewText(e.target.value)}
+              rows={6}
+              className="w-full text-xs bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-700 rounded px-2 py-1.5 text-stone-800 dark:text-stone-200 placeholder-stone-400 focus:outline-none focus:border-stone-400 dark:focus:border-stone-500 resize-none transition-colors"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={handleSubmit}
+                disabled={!newText.trim()}
+                className="flex-1 text-xs px-2 py-1.5 bg-stone-800 dark:bg-stone-700 text-white rounded hover:bg-stone-700 dark:hover:bg-stone-600 disabled:opacity-40 transition-colors"
+              >
+                Add
+              </button>
+              <button
+                onClick={handleCancel}
+                className="text-xs px-2 py-1.5 text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setIsAdding(true)}
+            className="w-full text-left px-4 py-2.5 text-xs text-stone-400 dark:text-stone-600 hover:text-stone-600 dark:hover:text-stone-400 transition-colors mt-1"
+          >
+            + Add chapter
+          </button>
+        )}
       </nav>
       <div className="px-6 pb-6 border-b border-stone-200 dark:border-stone-800 transition-colors">
         <h2 className="text-xs uppercase tracking-wider text-stone-500 dark:text-stone-400 font-medium mb-1 pt-12">Manuscript</h2>
