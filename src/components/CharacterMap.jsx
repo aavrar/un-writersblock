@@ -16,7 +16,19 @@ export default function CharacterMap({ chapters, onManageCharacters }) {
   const rows = buildCharacterMap(chapters)
 
   if (rows.length === 0) {
-    return <p className="text-stone-400 text-sm">No characters detected across chapters.</p>
+    return (
+      <div className="flex flex-col items-center justify-center py-16">
+        <p className="text-stone-400 text-sm mb-4">No characters detected across chapters.</p>
+        {onManageCharacters && (
+          <button
+            onClick={onManageCharacters}
+            className="text-sm text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200 underline transition-colors"
+          >
+            Manage characters
+          </button>
+        )}
+      </div>
+    )
   }
 
   const abbrev = title => title.replace(/^(chapter|ch\.?)\s*\d+\s*[:.-]?\s*/i, '').slice(0, 12) || `Ch ${chapters.indexOf(chapters.find(c => c.title === title)) + 1}`

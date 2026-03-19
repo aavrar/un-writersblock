@@ -103,5 +103,5 @@ export function detectCharacters(paragraphs, rules = {}) {
   return Object.entries(counts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 20)
-    .map(entry => entry[0])
+    .map(entry => ({ name: entry[0], count: entry[1] }))
 }

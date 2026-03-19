@@ -32,7 +32,7 @@ export default function RightPanel({ view, onClose, onManageCharacters, chapterI
         {view.type === 'threads' && <ThreadsView threads={view.data} chapters={view.chapters} />}
         {view.type === 'outline' && <OutlineView results={view.data} sectionHeader={view.sectionHeader} />}
         {view.type === 'characterMap' && <CharacterMap chapters={view.chapters} onManageCharacters={onManageCharacters} />}
-        {view.type === 'timeline' && <TimelineView chapters={view.chapters} outlineSections={view.outlineSections} />}
+        {view.type === 'timeline' && <TimelineView chapters={view.chapters} outlineSections={view.outlineSections} onManageCharacters={onManageCharacters} />}
         {view.type === 'rhythm' && (
           <div className="w-full">
             <p className="text-sm text-stone-500 dark:text-stone-400 mb-8 italic">A horizontal view of the emotional and structural flow of the chapter.</p>

@@ -30,8 +30,8 @@ async function analyzeChapters(chapters, rules = {}) {
           characters: ch.characters.filter(char => {
             if (rules[char.name] && rules[char.name].action === 'add') return true
             if (char.name === 'Narrator ("I")') return true
-            return globalCounts[char.name] > 2
-          })
+            return globalCounts[char.name] >= 3
+          }).map(c => c.name)
         }))
         resolve(processed)
         worker.terminate()
