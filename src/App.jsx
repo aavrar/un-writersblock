@@ -6,6 +6,7 @@ import { computeStats } from './lib/computeStats'
 import { detectThreads } from './lib/detectThreads'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { set, get, del } from 'idb-keyval'
+import { Analytics } from '@vercel/analytics/react'
 import UploadZone from './components/UploadZone'
 import ChapterSplitter from './components/ChapterSplitter'
 import ChapterList from './components/ChapterList'
@@ -230,17 +231,21 @@ export default function App() {
           </div>
         )}
         <ThemeToggle />
+        <Analytics />
       </div>
     )
   }
 
   if (phase === 'splitting') {
     return (
-      <ChapterSplitter
-        paragraphs={allParagraphs}
-        onConfirm={handleSplitConfirm}
-        onSkip={handleSkip}
-      />
+      <>
+        <ChapterSplitter
+          paragraphs={allParagraphs}
+          onConfirm={handleSplitConfirm}
+          onSkip={handleSkip}
+        />
+        <Analytics />
+      </>
     )
   }
 
@@ -278,6 +283,7 @@ export default function App() {
         />
       )}
       <ThemeToggle />
+      <Analytics />
     </div>
   )
 }
