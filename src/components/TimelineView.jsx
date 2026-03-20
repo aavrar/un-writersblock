@@ -50,8 +50,8 @@ export default function TimelineView({ chapters, outlineSections, onManageCharac
         const isPresent = row.presence[i]
         return (
             <div className="relative flex items-center justify-center w-full h-full">
-                <div className={`absolute top-1/2 -translate-y-1/2 w-full h-0.5 ${isPresent ? 'bg-stone-200 dark:bg-stone-800 group-hover:bg-stone-300 dark:group-hover:bg-stone-700' : ''} transition-colors z-0`} />
-                <div className={`relative z-10 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-stone-950 transition-all ${isPresent ? 'bg-stone-500 dark:bg-stone-400 scale-100' : 'bg-transparent border-none scale-0 group-hover:scale-50 group-hover:bg-stone-300 dark:group-hover:bg-stone-700'} `} />
+                <div className={`absolute top-1/2 -translate-y-1/2 w-full h-0.5 ${isPresent ? 'bg-indigo-200 dark:bg-indigo-900/40 group-hover:bg-indigo-300 dark:group-hover:bg-indigo-800' : ''} transition-colors z-0`} />
+                <div className={`relative z-10 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-stone-950 transition-all ${isPresent ? 'bg-indigo-500 dark:bg-indigo-400 scale-100' : 'bg-transparent border-none scale-0 group-hover:scale-50 group-hover:bg-stone-300 dark:group-hover:bg-stone-700'} `} />
             </div>
         )
     }

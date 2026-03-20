@@ -9,8 +9,10 @@ import RhythmChart from './RhythmChart'
 import RightPanel from './RightPanel'
 import SceneSplitterModal from './SceneSplitterModal'
 import ChapterOverview from './ChapterOverview'
+import DragHandle from './DragHandle'
 
 export default function ReentryBrief({
+  centerWidth, onCenterResize,
   chapter, chapters, threads, outlineSections, onOutlineLoaded,
   onUpdateScenes, onManageCharacters, chapterIndex, annotations, onUpdateAnnotations
 }) {
@@ -51,7 +53,7 @@ export default function ReentryBrief({
 
   return (
     <div className="flex flex-1 overflow-hidden">
-      <main className="w-[520px] shrink-0 overflow-y-auto px-10 py-8">
+      <main style={{ width: centerWidth, minWidth: centerWidth }} className="shrink-0 overflow-y-auto px-10 py-8">
         <div className="flex items-start justify-between mb-1">
           <h1 className="text-xl font-medium text-stone-900 dark:text-stone-100">{title}</h1>
         </div>
@@ -135,6 +137,7 @@ export default function ReentryBrief({
         </div>
       </main>
 
+      <DragHandle onDelta={onCenterResize} />
       <RightPanel
         view={expandedView}
         onClose={() => setExpandedView(null)}

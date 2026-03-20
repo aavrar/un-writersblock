@@ -13,6 +13,7 @@ import ChapterList from './components/ChapterList'
 import ReentryBrief from './components/ReentryBrief'
 import ThemeToggle from './components/ThemeToggle'
 import CharacterManagerModal from './components/CharacterManagerModal'
+import DragHandle from './components/DragHandle'
 
 async function analyzeChapters(chapters, rules = {}) {
   return new Promise((resolve) => {
@@ -54,6 +55,8 @@ export default function App() {
 
   const [storedKey, setStoredKey] = useLocalStorage('manuscript_key', null)
   const [selectedIndex, setSelectedIndex] = useLocalStorage('selected_chapter', 0)
+  const [sidebarWidth, setSidebarWidth] = useLocalStorage('panel_sidebar_width', 256)
+  const [centerWidth, setCenterWidth] = useLocalStorage('panel_center_width', 520)
   const [outlineSections, setOutlineSections] = useState(null)
   const [characterRules, setCharacterRules] = useState({})
   const [annotations, setAnnotations] = useState({})
@@ -268,6 +271,7 @@ export default function App() {
   return (
     <div className="flex h-screen overflow-hidden bg-stone-50 dark:bg-stone-950 transition-colors">
       <ChapterList
+        panelWidth={sidebarWidth}
         chapters={chapters}
         selectedIndex={safeIndex}
         onSelect={setSelectedIndex}
@@ -276,7 +280,10 @@ export default function App() {
         projectGoal={projectGoal}
         onUpdateProjectGoal={handleUpdateProjectGoal}
       />
+      <DragHandle onDelta={d => setSidebarWidth(w => Math.min(400, Math.max(180, w + d)))} />
       <ReentryBrief
+        centerWidth={centerWidth}
+        onCenterResize={d => setCenterWidth(w => Math.min(720, Math.max(360, w + d)))}
         chapter={chapters[safeIndex]}
         chapters={chapters}
         threads={threads}

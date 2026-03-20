@@ -1,9 +1,9 @@
 import { memo, useState, useEffect } from 'react'
 
 function sentenceColor(length) {
-  if (length <= 8) return '#a8a29e'
-  if (length <= 20) return '#78716c'
-  return '#44403c'
+  if (length <= 8) return '#60a5fa'
+  if (length <= 20) return '#818cf8'
+  return '#f97316'
 }
 
 export default memo(function RhythmChart({ sentenceLengths, sentenceSentiment, sentences, onExpand, isExpanded }) {
@@ -100,9 +100,9 @@ export default memo(function RhythmChart({ sentenceLengths, sentenceSentiment, s
       <div className="flex flex-wrap items-center justify-between gap-4 mt-3">
         <div className="flex flex-wrap gap-4">
           {[
-            { color: '#a8a29e', label: 'short (1–8 words)' },
-            { color: '#78716c', label: 'medium (9–20)' },
-            { color: '#44403c', label: 'long (21+)' },
+            { color: '#60a5fa', label: 'short (1–8 words)' },
+            { color: '#818cf8', label: 'medium (9–20)' },
+            { color: '#f97316', label: 'long (21+)' },
           ].map(({ color, label }) => (
             <div key={label} className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: color }} />

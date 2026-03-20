@@ -143,8 +143,8 @@ export default function OutlineDiff({ chapterTitle, chapterParagraphs, sections,
       <div className="space-y-2">
         {results.slice(0, PREVIEW).map(({ beat, covered }, i) => (
           <div key={i} className="flex items-start gap-2.5">
-            <div className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${covered ? 'bg-stone-500' : 'bg-stone-200'}`} />
-            <p className={`text-sm leading-snug ${covered ? 'text-stone-600' : 'text-stone-400'}`}>{beat}</p>
+            <div className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${covered ? 'bg-teal-500' : 'bg-stone-200 dark:bg-stone-700'}`} />
+            <p className={`text-sm leading-snug ${covered ? 'text-stone-700 dark:text-stone-200' : 'text-stone-400 dark:text-stone-600'}`}>{beat}</p>
           </div>
         ))}
         {results.length > PREVIEW && (

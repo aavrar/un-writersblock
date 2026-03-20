@@ -64,8 +64,7 @@ export default function CharacterMap({ chapters, onManageCharacters }) {
               </td>
               {presence.map((present, i) => (
                 <td key={i} className="w-8 text-center py-1">
-                  <div className={`w-2 h-2 rounded-full mx-auto transition-colors ${present ? 'bg-stone-500 group-hover:bg-stone-700' : 'bg-stone-100'
-                    }`} />
+                  <div className={`w-2 h-2 rounded-full mx-auto transition-colors ${present ? 'bg-indigo-500 dark:bg-indigo-400 group-hover:bg-indigo-600 dark:group-hover:bg-indigo-300' : 'bg-stone-100 dark:bg-stone-800'}`} />
                 </td>
               ))}
             </tr>
@@ -74,7 +73,7 @@ export default function CharacterMap({ chapters, onManageCharacters }) {
       </table>
       <div className="flex items-center gap-4 mt-6 pt-4 border-t border-stone-100">
         <div className="flex items-center gap-1.5">
-          <div className="w-2 h-2 rounded-full bg-stone-500" />
+          <div className="w-2 h-2 rounded-full bg-indigo-500" />
           <span className="text-xs text-stone-400">appears</span>
         </div>
         <div className="flex items-center gap-1.5">

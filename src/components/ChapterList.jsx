@@ -7,7 +7,7 @@ function textToParagraphs(text) {
   return text.split(/\n/).map(s => s.trim()).filter(Boolean)
 }
 
-export default memo(function ChapterList({ chapters, selectedIndex, onSelect, onReset, onAddChapter, projectGoal, onUpdateProjectGoal }) {
+export default memo(function ChapterList({ panelWidth, chapters, selectedIndex, onSelect, onReset, onAddChapter, projectGoal, onUpdateProjectGoal }) {
   const maxWords = Math.max(...chapters.map(c => c.stats.wordCount), 1)
   const totalWords = chapters.reduce((sum, c) => sum + c.stats.wordCount, 0)
   const [isAdding, setIsAdding] = useState(false)
@@ -31,7 +31,7 @@ export default memo(function ChapterList({ chapters, selectedIndex, onSelect, on
   }
 
   return (
-    <aside className="w-64 shrink-0 border-r border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 flex flex-col h-screen sticky top-0 overflow-hidden transition-colors">
+    <aside style={{ width: panelWidth, minWidth: panelWidth }} className="shrink-0 border-r border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 flex flex-col h-screen sticky top-0 overflow-hidden transition-colors">
       <div className="px-4 py-4 border-b border-stone-200 dark:border-stone-800">
         <p className="text-xs text-stone-400 dark:text-stone-500 uppercase tracking-wider font-medium">Chapters</p>
       </div>
@@ -44,10 +44,10 @@ export default memo(function ChapterList({ chapters, selectedIndex, onSelect, on
             <button
               key={i}
               onClick={() => onSelect(i)}
-              className={`relative w-full text-left px-4 py-2.5 text-sm transition-colors overflow-hidden ${isSelected ? 'text-stone-900 dark:text-stone-100 font-medium' : 'text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'}`}
+              className={`relative w-full text-left px-4 py-2.5 text-sm transition-colors overflow-hidden ${isSelected ? 'text-indigo-900 dark:text-indigo-200 font-medium' : 'text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'}`}
             >
               <div
-                className={`absolute inset-y-0 left-0 transition-colors ${isSelected ? 'bg-stone-100 dark:bg-stone-800' : 'bg-stone-50 dark:bg-stone-800/20'}`}
+                className={`absolute inset-y-0 left-0 transition-colors ${isSelected ? 'bg-indigo-50 dark:bg-indigo-950/50' : 'bg-stone-50 dark:bg-stone-800/20'}`}
                 style={{ width: `${barWidth}%` }}
               />
               <span className="relative flex items-center gap-2">

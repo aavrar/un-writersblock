@@ -189,8 +189,8 @@ function OutlineView({ results, sectionHeader }) {
       <div className="space-y-3">
         {results.map(({ beat, covered }, i) => (
           <div key={i} className="flex items-start gap-3">
-            <div className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 transition-colors ${covered ? 'bg-stone-500 dark:bg-stone-400' : 'bg-stone-200 dark:bg-stone-700'}`} />
-            <p className={`text-sm leading-snug transition-colors ${covered ? 'text-stone-700 dark:text-stone-300' : 'text-stone-400 dark:text-stone-600'}`}>{beat}</p>
+            <div className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 transition-colors ${covered ? 'bg-teal-500' : 'bg-stone-200 dark:bg-stone-700'}`} />
+            <p className={`text-sm leading-snug transition-colors ${covered ? 'text-stone-700 dark:text-stone-200' : 'text-stone-400 dark:text-stone-600'}`}>{beat}</p>
           </div>
         ))}
       </div>
