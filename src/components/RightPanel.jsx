@@ -5,6 +5,7 @@ import TimelineView from './TimelineView'
 import RhythmChart from './RhythmChart'
 import ChapterOverview from './ChapterOverview'
 import InteractionMatrix from './InteractionMatrix'
+import GhostDeltaView from './GhostDeltaView'
 
 const TABS = [
   { type: 'chapter', label: 'Chapter' },
@@ -108,28 +109,47 @@ export default function RightPanel({ view, onClose, onManageCharacters }) {
 
 function ChapterView({ chapter, chapterIndex, annotations, onUpdateAnnotations }) {
   const [showFriction, setShowFriction] = useState(false)
+  const [showDelta, setShowDelta] = useState(false)
+  
+  const hasDiff = !!chapter.diff
 
   return (
     <div>
-      <ChapterOverview stats={chapter.stats} characters={chapter.characters} />
+      <ChapterOverview stats={chapter.stats} characters={chapter.characters} diff={chapter.diff} />
       <div className="h-px bg-stone-100 dark:bg-stone-800 my-8" />
       
-      <div className="flex justify-end mb-6">
-        <label className="flex items-center gap-2 cursor-pointer group">
+      <div className="flex flex-col gap-3 justify-end mb-8 border-b border-stone-100 dark:border-stone-800 pb-6">
+        <label className="flex items-center justify-end gap-2 cursor-pointer group">
           <div className="relative">
             <input type="checkbox" className="sr-only" checked={showFriction} onChange={(e) => setShowFriction(e.target.checked)} />
-            <div className={`block w-10 h-6 rounded-full transition-colors ${showFriction ? 'bg-indigo-500' : 'bg-stone-200 dark:bg-stone-800'}`}></div>
-            <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${showFriction ? 'transform translate-x-4' : ''}`}></div>
+            <div className={`block w-8 h-4 rounded-full transition-colors ${showFriction ? 'bg-indigo-500' : 'bg-stone-200 dark:bg-stone-800'}`}></div>
+            <div className={`absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full transition-transform ${showFriction ? 'transform translate-x-4' : ''}`}></div>
           </div>
-          <span className="text-xs font-medium text-stone-500 group-hover:text-stone-700 dark:text-stone-400 dark:group-hover:text-stone-300 transition-colors">
-            Show "Prose Blockers" X-Ray
+          <span className="text-xs font-medium text-stone-500 group-hover:text-stone-700 dark:text-stone-400 dark:group-hover:text-stone-300 transition-colors w-40 text-right">
+            Prose Blockers X-Ray
           </span>
         </label>
+        
+        {hasDiff && (
+          <label className="flex items-center justify-end gap-2 cursor-pointer group">
+            <div className="relative">
+              <input type="checkbox" className="sr-only" checked={showDelta} onChange={(e) => setShowDelta(e.target.checked)} />
+              <div className={`block w-8 h-4 rounded-full transition-colors ${showDelta ? 'bg-emerald-500' : 'bg-stone-200 dark:bg-stone-800'}`}></div>
+              <div className={`absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full transition-transform ${showDelta ? 'transform translate-x-4' : ''}`}></div>
+            </div>
+            <span className="text-xs font-medium text-stone-500 group-hover:text-stone-700 dark:text-stone-400 dark:group-hover:text-stone-300 transition-colors w-40 text-right">
+              Show Draft Delta
+            </span>
+          </label>
+        )}
       </div>
 
-      <div className="space-y-10">
-        {chapter.scenes.map((scene, si) => {
-          const sceneWords = scene.paragraphs.join(' ').split(/\s+/).filter(Boolean).length
+      {showDelta && hasDiff ? (
+        <GhostDeltaView diff={chapter.diff} />
+      ) : (
+        <div className="space-y-10">
+          {chapter.scenes.map((scene, si) => {
+            const sceneWords = scene.paragraphs.join(' ').split(/\s+/).filter(Boolean).length
           const dialogueParas = scene.paragraphs.filter(p => /^[\u201C"]/.test(p.trim())).length
           const dialoguePct = Math.round((dialogueParas / Math.max(scene.paragraphs.length, 1)) * 100)
 
@@ -157,7 +177,8 @@ function ChapterView({ chapter, chapterIndex, annotations, onUpdateAnnotations }
             </div>
           )
         })}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

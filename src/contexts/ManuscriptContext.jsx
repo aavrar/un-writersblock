@@ -7,10 +7,10 @@ import { set, get, del } from 'idb-keyval'
 
 const ManuscriptContext = createContext(null)
 
-async function analyzeChapters(chapters, rules = {}) {
+const analyzeChapters = (chaps, rules, previousChapters = []) => {
   return new Promise((resolve) => {
     const worker = new Worker(new URL('../lib/parserWorker.js', import.meta.url), { type: 'module' })
-    worker.onmessage = (e) => {
+    worker.addEventListener('message', (e) => {
       if (e.data.type === 'done') {
         const rawProcessed = e.data.payload
         const globalCounts = {}
@@ -38,8 +38,11 @@ async function analyzeChapters(chapters, rules = {}) {
         resolve(processed)
         worker.terminate()
       }
-    }
-    worker.postMessage({ type: 'analyze', payload: { chapters, rules } })
+    })
+    worker.postMessage({ 
+      type: 'analyze', 
+      payload: { chapters: chaps, rules, previousChapters } 
+    })
   })
 }
 
@@ -100,6 +103,12 @@ export function ManuscriptProvider({ children }) {
       setSelectedIndex(0)
       setStoredKey(key)
     }
+    
+    // Store the previous state silently in IDB as backup
+    if (chapters && chapters.length > 0) {
+      await set('previous_manuscript_chapters', chapters)
+    }
+
     setChapters(analyzed)
     await set('manuscript_chapters', analyzed)
     setPhase('browsing')
@@ -111,7 +120,8 @@ export function ManuscriptProvider({ children }) {
     try {
       const result = await parseManuscript(arrayBuffer)
       if (result.hasHeadings) {
-        const analyzed = await analyzeChapters(result.chapters, characterRules)
+        const prevChaps = (await get('manuscript_chapters')) || (await get('previous_manuscript_chapters')) || []
+        const analyzed = await analyzeChapters(result.chapters, characterRules, prevChaps)
         await applyChapters(analyzed)
       } else {
         setAllParagraphs(result.allParagraphs)
@@ -126,8 +136,14 @@ export function ManuscriptProvider({ children }) {
 
   async function handleSplitConfirm(boundaryIndices) {
     setPhase('parsing')
-    const analyzed = await analyzeChapters(buildChaptersFromBoundaries(allParagraphs, boundaryIndices), characterRules)
-    await applyChapters(analyzed)
+    try {
+      const prevChaps = (await get('manuscript_chapters')) || (await get('previous_manuscript_chapters')) || []
+      const analyzed = await analyzeChapters(buildChaptersFromBoundaries(allParagraphs, boundaryIndices), characterRules, prevChaps)
+      await applyChapters(analyzed)
+    } catch (e) {
+      setParseError(e.message)
+      setPhase('idle')
+    }
   }
 
   async function handleSkip() {
@@ -137,6 +153,11 @@ export function ManuscriptProvider({ children }) {
   }
 
   async function handleReset() {
+    const activeChaps = await get('manuscript_chapters')
+    if (activeChaps && activeChaps.length > 0) {
+      await set('previous_manuscript_chapters', activeChaps)
+    }
+
     setPhase('idle')
     setChapters([])
     setAllParagraphs([])
