@@ -11,11 +11,16 @@ import SceneSplitterModal from './SceneSplitterModal'
 import ChapterOverview from './ChapterOverview'
 import DragHandle from './DragHandle'
 
-export default function ReentryBrief({
-  centerWidth, onCenterResize,
-  chapter, chapters, threads, outlineSections, onOutlineLoaded,
-  onUpdateScenes, onManageCharacters, chapterIndex, annotations, onUpdateAnnotations
-}) {
+import { useManuscript } from '../contexts/ManuscriptContext'
+
+export default function ReentryBrief({ centerWidth, onCenterResize, onManageCharacters }) {
+  const {
+    activeChapter: chapter, chapters, threads, 
+    outlineSections, updateOutlineSections: onOutlineLoaded,
+    handleUpdateChapterScenes: onUpdateScenes, 
+    selectedIndex: chapterIndex, 
+    annotations, handleUpdateAnnotations: onUpdateAnnotations
+  } = useManuscript()
   const [expandedView, setExpandedView] = useState(null)
   const [isEditingScenes, setIsEditingScenes] = useState(false)
   const [overviewMode, setOverviewMode] = useState(false)
@@ -141,14 +146,7 @@ export default function ReentryBrief({
       <RightPanel
         view={expandedView}
         onClose={() => setExpandedView(null)}
-        chapter={chapter}
-        chapters={chapters}
-        threads={threads}
-        outlineSections={outlineSections}
         onManageCharacters={onManageCharacters}
-        chapterIndex={chapterIndex}
-        annotations={annotations}
-        onUpdateAnnotations={onUpdateAnnotations}
       />
 
       {isEditingScenes && (

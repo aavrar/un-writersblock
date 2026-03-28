@@ -10,8 +10,12 @@ self.addEventListener('message', (e) => {
         const analyzed = chapters.map(chapter => {
             const scenes = chapter.scenes || detectScenes(chapter.paragraphs)
             const characters = detectCharacters(chapter.paragraphs, rules)
-            const stats = computeStats(chapter.paragraphs, scenes)
-            return { ...chapter, scenes, characters, stats }
+            const scenesWithCharacters = scenes.map(scene => ({
+                ...scene,
+                characters: detectCharacters(scene.paragraphs, rules)
+            }))
+            const stats = computeStats(chapter.paragraphs, scenesWithCharacters)
+            return { ...chapter, scenes: scenesWithCharacters, characters, stats }
         })
 
         self.postMessage({ type: 'done', payload: analyzed })

@@ -4,20 +4,24 @@ import ParagraphWithAnnotation from './ParagraphWithAnnotation'
 import TimelineView from './TimelineView'
 import RhythmChart from './RhythmChart'
 import ChapterOverview from './ChapterOverview'
+import InteractionMatrix from './InteractionMatrix'
 
 const TABS = [
   { type: 'chapter', label: 'Chapter' },
   { type: 'threads', label: 'Threads' },
   { type: 'characterMap', label: 'Characters' },
+  { type: 'network', label: 'Matrix' },
   { type: 'timeline', label: 'Timeline' },
   { type: 'rhythm', label: 'Rhythm' },
 ]
 
-export default function RightPanel({
-  view, onClose,
-  chapter, chapters, threads, outlineSections,
-  onManageCharacters, chapterIndex, annotations, onUpdateAnnotations
-}) {
+import { useManuscript } from '../contexts/ManuscriptContext'
+
+export default function RightPanel({ view, onClose, onManageCharacters }) {
+  const { 
+    activeChapter: chapter, chapters, threads, outlineSections,
+    selectedIndex: chapterIndex, annotations, handleUpdateAnnotations: onUpdateAnnotations
+  } = useManuscript()
   const [activeTab, setActiveTab] = useState(view?.type || 'chapter')
 
   useEffect(() => {
@@ -80,6 +84,9 @@ export default function RightPanel({
         {activeTab === 'characterMap' && (
           <CharacterMap chapters={chapters} onManageCharacters={onManageCharacters} />
         )}
+        {activeTab === 'network' && (
+          <InteractionMatrix chapters={chapters} />
+        )}
         {activeTab === 'timeline' && (
           <TimelineView chapters={chapters} outlineSections={outlineSections} onManageCharacters={onManageCharacters} />
         )}
@@ -100,10 +107,26 @@ export default function RightPanel({
 }
 
 function ChapterView({ chapter, chapterIndex, annotations, onUpdateAnnotations }) {
+  const [showFriction, setShowFriction] = useState(false)
+
   return (
     <div>
       <ChapterOverview stats={chapter.stats} characters={chapter.characters} />
       <div className="h-px bg-stone-100 dark:bg-stone-800 my-8" />
+      
+      <div className="flex justify-end mb-6">
+        <label className="flex items-center gap-2 cursor-pointer group">
+          <div className="relative">
+            <input type="checkbox" className="sr-only" checked={showFriction} onChange={(e) => setShowFriction(e.target.checked)} />
+            <div className={`block w-10 h-6 rounded-full transition-colors ${showFriction ? 'bg-indigo-500' : 'bg-stone-200 dark:bg-stone-800'}`}></div>
+            <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${showFriction ? 'transform translate-x-4' : ''}`}></div>
+          </div>
+          <span className="text-xs font-medium text-stone-500 group-hover:text-stone-700 dark:text-stone-400 dark:group-hover:text-stone-300 transition-colors">
+            Show "Prose Blockers" X-Ray
+          </span>
+        </label>
+      </div>
+
       <div className="space-y-10">
         {chapter.scenes.map((scene, si) => {
           const sceneWords = scene.paragraphs.join(' ').split(/\s+/).filter(Boolean).length
@@ -126,6 +149,7 @@ function ChapterView({ chapter, chapterIndex, annotations, onUpdateAnnotations }
                       text={paragraph}
                       note={annotations?.[absIndex]}
                       onSaveNote={(note) => onUpdateAnnotations(chapterIndex, absIndex, note)}
+                      showFriction={showFriction}
                     />
                   )
                 })}

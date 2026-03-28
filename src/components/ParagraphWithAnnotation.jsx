@@ -1,12 +1,28 @@
 import { useState } from 'react'
 
-export default function ParagraphWithAnnotation({ text, note, onSaveNote }) {
+export default function ParagraphWithAnnotation({ text, note, onSaveNote, showFriction }) {
     const [isEditing, setIsEditing] = useState(false)
     const [draft, setDraft] = useState(note || '')
 
     function handleSave() {
         onSaveNote(draft.trim())
         setIsEditing(false)
+    }
+
+    function highlightFriction(raw) {
+        if (!showFriction) return raw;
+        
+        let ht = raw.replace(/\b(was|were|is|are|am|be|been|being)\s+(\w+ed)\b/gi, '<span class="bg-amber-200/50 dark:bg-amber-900/40 text-amber-900 dark:text-amber-200 px-0.5 rounded border-b border-amber-300 dark:border-amber-700" title="Passive Voice">$1 $2</span>')
+        
+        ht = ht.replace(/\b(felt|saw|heard|realized|suddenly|just|really|seemed|knew|noticed|decided)\b/gi, '<span class="bg-orange-200/50 dark:bg-orange-900/40 text-orange-900 dark:text-orange-200 px-0.5 rounded border-b border-orange-300 dark:border-orange-700" title="Filter / Crutch Word">$1</span>')
+        
+        ht = ht.replace(/\b(\w+ly)\b/gi, (match) => {
+            const lower = match.toLowerCase();
+            const exceptions = new Set(['family', 'reply', 'supply', 'apply', 'comply', 'multiply', 'rely', 'monopoly', 'anomaly', 'jelly', 'belly', 'smelly', 'ally', 'rally', 'silly', 'lily', 'holy', 'melancholy', 'ugly', 'early', 'only']);
+            if (exceptions.has(lower)) return match;
+            return `<span class="bg-rose-200/50 dark:bg-rose-900/40 text-rose-900 dark:text-rose-200 px-0.5 rounded border-b border-rose-300 dark:border-rose-700" title="Adverb Base">${match}</span>`;
+        });
+        return ht;
     }
 
     return (
@@ -25,9 +41,10 @@ export default function ParagraphWithAnnotation({ text, note, onSaveNote }) {
                 </button>
             </div>
 
-            <p className={`font-serif leading-relaxed text-base transition-colors ${note ? 'text-stone-800 dark:text-stone-200 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 -mx-2 rounded' : 'text-stone-700 dark:text-stone-300'}`}>
-                {text}
-            </p>
+            <p 
+                className={`font-serif leading-relaxed text-base transition-colors ${note ? 'text-stone-800 dark:text-stone-200 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 -mx-2 rounded' : 'text-stone-700 dark:text-stone-300'}`}
+                dangerouslySetInnerHTML={{ __html: showFriction ? highlightFriction(text) : text }}
+            />
 
             {isEditing && (
                 <div className="mt-2 mb-4 p-3 bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded shadow-sm">

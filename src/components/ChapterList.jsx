@@ -7,7 +7,10 @@ function textToParagraphs(text) {
   return text.split(/\n/).map(s => s.trim()).filter(Boolean)
 }
 
-export default memo(function ChapterList({ panelWidth, chapters, selectedIndex, onSelect, onReset, onAddChapter, projectGoal, onUpdateProjectGoal }) {
+import { useManuscript } from '../contexts/ManuscriptContext'
+
+export default memo(function ChapterList({ panelWidth }) {
+  const { chapters, selectedIndex, setSelectedIndex: onSelect, handleReset: onReset, handleAddChapter: onAddChapter, projectGoal, handleUpdateProjectGoal: onUpdateProjectGoal } = useManuscript()
   const maxWords = Math.max(...chapters.map(c => c.stats.wordCount), 1)
   const totalWords = chapters.reduce((sum, c) => sum + c.stats.wordCount, 0)
   const [isAdding, setIsAdding] = useState(false)
